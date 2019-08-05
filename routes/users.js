@@ -144,18 +144,20 @@ router.post('/loginOut', function (req, res, next) {
 router.post('/register', function (req, res, next) {
   var param = {
     userName:req.body.userName,
-    userPwd:req.body.userPwd
+    userPwd:req.body.userPwd,
+    creatTime:(new Date).toString()
   }
   let content = param; // 要生成token的主题信息
   let secretOrPrivateKey = "long" // 这是加密的key（密钥） 
   let token = jwt.sign(content, secretOrPrivateKey, {
-    expiresIn: 60 * 1 * 1 // 1分钟过期
+    expiresIn: 60 * 60 * 1 // 1小时过期
   });
   var params = {
     userId:Math.floor(Math.random()*100),
     userName:req.body.userName,
     userPwd:req.body.userPwd,
-    token:token
+    token:token,
+    creatTime:(new Date).toString()
   }
 // 先判断用户名是否存在
   User.findOne({userName:req.body.userName}, function (err, doc) {
