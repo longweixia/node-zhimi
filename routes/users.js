@@ -53,7 +53,7 @@ router.post('/login', function (req, res, next) {
         let content = param; // 要生成token的主题信息
         let secretOrPrivateKey = "long" // 这是加密的key（密钥） 
         let token = jwt.sign(content, secretOrPrivateKey, {
-          expiresIn: 60 * 1 * 1 // 1分钟过期
+          expiresIn: 60 * 60 * 1 // 1分钟过期
         });
         doc.token = token
         doc.save(function (err1, doc1) {

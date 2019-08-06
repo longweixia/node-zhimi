@@ -7,7 +7,7 @@ var Resume = require('./../models/resume')
 router.post('/resumeInfo', function (req, res, next) {
     var param = {
         userName:req.body.userName,
-        content:req.body.content,
+        resumeContent:req.body.content,
         creatTime:(new Date).toString()
       }
       Resume.create(param, function (err, doc) {
