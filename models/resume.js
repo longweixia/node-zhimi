@@ -1,3 +1,4 @@
+// 简历文字相关
 var mongoose = require('mongoose');
 var resumeSchema = new mongoose.Schema({
  "userName": String,

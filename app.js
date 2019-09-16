@@ -8,6 +8,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var resumesRouter = require('./routes/resumes');
+var resumesImgRouter = require('./routes/resumeImgs');
 
 var app = express();
 
@@ -22,11 +23,13 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(cookieParser());
+// 这里配置了静态资源，所以访问图片直接http://localhost:3000/images/homeList1.png可以拿到
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/resumes', resumesRouter);
+app.use('/resumesImgs', resumesImgRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -43,5 +46,6 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
 
 module.exports = app;
