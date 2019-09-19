@@ -5,6 +5,40 @@ var  multer = require('multer');
 let fs = require("fs");
 // let path = require("path");
 
+// 读取首页图片列表
+router.post('/resumeImgList', function(req, res, next) {
+  var paramas = req.body.flag;
+  // const {resolve} = require('path')
+  // console.log('__dirname : ' + __dirname)
+  // console.log('resolve   : ' + resolve('./'))
+  var resumePath = process.cwd() //当前命令所在的目录F:\myproject\zhimi\node-zhimi
+  var url = []; //图片url列表数组
+  console.log('cwd:' + resumePath)
+  fs.readdir(resumePath + "/public/images", function(err, files) {
+      if (err) {
+          res.json({
+              status: "1",
+              msg: "查询文件失败" + err
+          });
+      } else {
+        // 把文件路径中的\换成/在浏览器上显示
+          files.forEach(function(file) {
+            // 拼接url
+              url.push("/images/" + file)
+          });
+          if (paramas == "all") {
+              res.json({
+                  status: "0",
+                  msg: "查询图片列表成功",
+                  result: files,
+                  url: url
+              });
+          }
+
+      }
+
+  });
+});
 
 // 提交简历信息
 router.post('/resumeInfo', function (req, res, next) {

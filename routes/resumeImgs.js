@@ -1,9 +1,7 @@
 var express = require('express');
 var router = express.Router();
 // var ResumeImg = require('./../models/resumeImg')
-var multer = require('multer');
 let fs = require("fs");
-let path = require("path");
 
 // 读取图片
 router.get('/resumeImgList', function(req, res, next) {
