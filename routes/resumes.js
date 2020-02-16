@@ -40,12 +40,14 @@ router.post('/resumeImgList', function(req, res, next) {
   });
 });
 
+// 通过通用版提交
 // 提交简历信息
 router.post('/resumeInfo', function (req, res, next) {
     var param = {
         userName:req.body.userName,
         resumeContent:req.body.content,
-        creatTime:(new Date).toString()
+        creatTime:(new Date).toString(),
+        hasCommonResume:req.body.hasCommonResume
       }
       Resume.create(param, function (err, doc) {
         if (err) {
@@ -82,6 +84,29 @@ router.post('/getResumeInfo', function (req, res, next) {
           });
         }
       })
+});
+// 通过模板商城提交
+// 提交简历信息
+router.post('/resumeTemplate', function (req, res, next) {
+  var param = {
+      userName:req.body.userName,
+      resumeContent:req.body.content,
+      creatTime:(new Date).toString()
+    }
+    Resume.create(param, function (err, doc) {
+      if (err) {
+        res.json({
+          status: "1",
+          msg: "注提交失败" + err
+        });
+      } else {
+        res.json({
+          status: "0",
+          msg: "提交成功",
+          result:doc
+        });
+      }
+    })
 });
 
 //上传接口
