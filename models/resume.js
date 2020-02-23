@@ -2,7 +2,7 @@
 var mongoose = require('mongoose');
 var resumeSchema = new mongoose.Schema({
  "userName": String,
- "creatTime": String,
+//  "creatTime": String,
  "hasCommonResume":Boolean,//是否有基础简历的信息
  "resumeContent":{//简历内容
     "base":[],//基本信息

@@ -8,7 +8,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var resumesRouter = require('./routes/resumes');
-// var resumesImgRouter = require('./routes/resumeImgs');
+var resumesImgRouter = require('./routes/resumeImgs');
+var resumeTemplatesRouter = require('./routes/resumeTemplates');
 
 var app = express();
 
@@ -29,7 +30,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/resumes', resumesRouter);
-// app.use('/resumeImgs', resumesImgRouter);
+app.use('/resumeTemplates', resumeTemplatesRouter);
+app.use('/resumeImgs', resumesImgRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
