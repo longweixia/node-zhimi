@@ -4,10 +4,9 @@ var resumeTemplates = require('./../models/resumeTemplate')
 var multer = require('multer');
 let fs = require("fs");
 let path = require("path");
-// 通过模板商城提交
-// 提交简历信息
-router.post('/resumeTemplates', function(req, res, next) {
 
+// 通过模板商城提交
+router.post('/resumeTemplates', function(req, res, next) {
     var resumeContent = req.body.content
    //  resumeContent.creatTime = (new Date).toString()
     resumeTemplates.create(resumeContent, function(err, doc) {
@@ -25,6 +24,27 @@ router.post('/resumeTemplates', function(req, res, next) {
             });
         }
     })
+});
+
+// 读取模板简历信息
+router.get('/getTemplatesResume', function (req, res, next) {
+    var param = {
+        userName:req.param("userName"),
+      }
+      resumeTemplates.findOne(param, function (err, doc) {
+        if (err) {
+          res.json({
+            status: "1",
+            msg: "查询简历信息失败" + err
+          });
+        } else {
+          res.json({
+            status: "0",
+            msg: "查询成功",
+            result:doc
+          });
+        }
+      })
 });
 // // 读取首页图片列表
 // router.post('/resumeImgList', function(req, res, next) {
@@ -86,26 +106,7 @@ router.post('/resumeTemplates', function(req, res, next) {
 //       })
 // });
 
-// // 读取简历信息
-// router.post('/getResumeInfo', function (req, res, next) {
-//     var param = {
-//         userName:req.body.userName,
-//       }
-//       Resume.findOne(param, function (err, doc) {
-//         if (err) {
-//           res.json({
-//             status: "1",
-//             msg: "查询简历信息失败" + err
-//           });
-//         } else {
-//           res.json({
-//             status: "0",
-//             msg: "查询成功",
-//             result:doc
-//           });
-//         }
-//       })
-// });
+
 
 
 // //上传接口
