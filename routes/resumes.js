@@ -3,7 +3,8 @@ var router = express.Router();
 var Resume = require('./../models/resume')
 var  multer = require('multer');
 let fs = require("fs");
-// let path = require("path");
+let path = require("path");
+let mimeType = require("mime-types")
 
 // 读取首页图片列表
 router.post('/resumeImgList', function(req, res, next) {
@@ -144,18 +145,50 @@ if (req.file.length === 0) {  //判断一下文件是否存在，也可以在前
 
 //下载接口
 router.post('/downImg', function (req, res, next) {
-
-  fs.readFile("F:\\myproject\\zhimi\\node-zhimi\\upload\\img.png","binary",function(err,data){
-if(err){
-  console.log(err)
-}else{
-  res.write(data,"binary")
-  res.end();
-
-}
-  })
- 
-
+  let name = req.body.name
+  // dir 为要获取的文件夹
+  let dir = "./public/images"
+  // readdirSync返回一个包含指定目录下的所有文件,如：
+  // ['homeList1.png','homeList2.png',...,'截图1.jpg] 
+  let pa = fs.readdirSync(dir)
+  // 找到图片匹配图片的方法
+  function dirEach(){
+    pa.forEach((item,index)=>{
+       // 如果匹配到指定文件名
+    if(item.split(".")[0] == name){
+      // path.resolve将以/开始的路径片段作为根目录，
+      // 在此之前的路径将会被丢弃，就像是在terminal中使用cd命令一样。获得在计算机上的绝对路径，如：
+      // F:\myproject\zhimi\node-zhimi\public\images\截图1.jpg
+      let itemPath = path.resolve(dir+"/"+item);
+      // 使用 fs.statSync(fullPath).isDirectory() 来判断是否是文件目录，如果是，递归，找到下一级的图片
+      let stat = fs.statSync(itemPath)
+      if(stat.isDirectory()){
+        dirEach(itemPath)
+      }else{
+        parse(itemPath)
+      }
+    }
+    })
+  }
+  // 将图片转换为base64的方法
+  function parse(filePath){
+    let filenameList = filePath.split("\\").slice(-1)[0].split('.')
+    let fileName = filenameList[0]
+    // fs.readFileSync同步读取文件,<Buffer ff d8 ff e0 00 10...>
+    let data = fs.readFileSync(filePath);
+    // buffer对象转换成指定的字符编码的字符串
+    data = new Buffer(data).toString("base64")
+    let base64 = "data:"+mimeType.lookup(filePath)+";base64,"+data
+    if(base64){
+       res.json({
+       status:"0",
+       msg:base64,
+       fileName:fileName
+     })
+    }
+  
+  }
+  dirEach()
 });
 
 
