@@ -190,6 +190,45 @@ router.post('/downImg', function (req, res, next) {
   }
   dirEach()
 });
+//删除接口
+router.post('/deletaResume', function (req, res, next) {
+  let name = req.body.name
+  // dir 为要获取的文件夹
+  let dir = "./public/images"
+  // readdirSync返回一个包含指定目录下的所有文件,如：
+  // ['homeList1.png','homeList2.png',...,'截图1.jpg] 
+  let pa = fs.readdirSync(dir)
+  // 找到图片匹配图片的方法
+  function dirEach(){
+    pa.forEach((item,index)=>{
+       // 如果匹配到指定文件名
+    if(item.split(".")[0] == name){
+      // path.resolve将以/开始的路径片段作为根目录，
+      // 在此之前的路径将会被丢弃，就像是在terminal中使用cd命令一样。获得在计算机上的绝对路径，如：
+      // F:\myproject\zhimi\node-zhimi\public\images\截图1.jpg
+      let itemPath = path.resolve(dir+"/"+item);
+      // 使用 fs.statSync(fullPath).isDirectory() 来判断是否是文件目录，如果是，递归，找到下一级的图片
+      let stat = fs.statSync(itemPath)
+      if(stat.isDirectory()){
+        dirEach(itemPath)
+      }else{
+       fs.unlinkSync(itemPath)
+       res.json({
+        status:"0",
+        msg:""
+      })
+      }
+      return false
+    }
+    })
+  }
+  dirEach()
+  res.json({
+    status:"0",
+    msg:"删除失败"
+  })
+ 
+});
 
 
 module.exports = router;
