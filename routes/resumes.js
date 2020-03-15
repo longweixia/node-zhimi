@@ -8,31 +8,42 @@ let mimeType = require("mime-types")
 
 // 读取首页图片列表
 router.post('/resumeImgList', function(req, res, next) {
-  var paramas = req.body.flag;
+  var flag = req.body.flag;//标识，获取全部的
+  var name = req.body.name;//用户名字
+  var typeImg = req.body.typeImg;//获取哪个文件夹的图片
   // const {resolve} = require('path')
   // console.log('__dirname : ' + __dirname)
   // console.log('resolve   : ' + resolve('./'))
   var resumePath = process.cwd() //当前命令所在的目录F:\myproject\zhimi\node-zhimi
   var url = []; //图片url列表数组
-  console.log('cwd:' + resumePath)
-  fs.readdir(resumePath + "/public/images", function(err, files) {
+  var redFiles;//读取的文件夹路径
+ if(typeImg=="mall"){
+  redFiles = resumePath + "/public/images/mall"
+ }else{
+  redFiles = resumePath + "/public/images/"+name+"/"+typeImg
+ }
+  fs.readdir(redFiles, function(err, files) {
       if (err) {
           res.json({
               status: "1",
               msg: "查询文件失败" + err
           });
       } else {
+        var imgArr=[];
         // 把文件路径中的\换成/在浏览器上显示
-          files.forEach(function(file) {
-            // 拼接url
-              url.push("/images/" + file)
+          files.forEach(function(file,index) {
+            let imgObj={
+              url:typeImg=="mall" ? "/images/mall/" + file:"/images/"+ name +"/"+ typeImg+"/" + file, // 拼接url
+              name:files[index]
+            }
+            imgArr.push(imgObj) 
           });
-          if (paramas == "all") {
+      
+          if (flag == "all") {
               res.json({
                   status: "0",
                   msg: "查询图片列表成功",
-                  result: files,
-                  url: url
+                  result: imgArr
               });
           }
 
@@ -192,9 +203,11 @@ router.post('/downImg', function (req, res, next) {
 });
 //删除接口
 router.post('/deletaResume', function (req, res, next) {
-  let name = req.body.name
+  var name = req.body.name;//文件名字
+  var userName = req.body.userName;//用户名字
+  var typeImg = req.body.typeImg;//获取哪个文件夹的图片
   // dir 为要获取的文件夹
-  let dir = "./public/images"
+  let dir = "./public/images/"+userName+"/"+typeImg
   // readdirSync返回一个包含指定目录下的所有文件,如：
   // ['homeList1.png','homeList2.png',...,'截图1.jpg] 
   let pa = fs.readdirSync(dir)
@@ -215,7 +228,7 @@ router.post('/deletaResume', function (req, res, next) {
        fs.unlinkSync(itemPath)
        res.json({
         status:"0",
-        msg:""
+        msg:"删除成功"
       })
       }
       return false
