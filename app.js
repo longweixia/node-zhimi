@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require("body-parser") // 处理前端传过来的数据
+
 var logger = require('morgan');
 
 var indexRouter = require('./routes/index');
@@ -19,10 +20,15 @@ app.set('view engine', 'jade');
 
 app.use(logger('dev'));
 
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({
-  extended: false
-}));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({
+//   extended: false
+// }));
+// 下面两项设置文件上传的大小限制为50m，不写的话可能会因为文件超过3m而报413
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+
+
 app.use(cookieParser());
 // 这里配置了静态资源，所以访问图片直接http://localhost:3000/images/homeList1.png可以拿到
 app.use(express.static(path.join(__dirname, 'public')));
