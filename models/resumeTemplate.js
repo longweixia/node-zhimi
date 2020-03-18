@@ -7,6 +7,7 @@ var resumeTemplateSchema = new mongoose.Schema({
  "resumeTemplate":[//模板简历
    {
       "TemplateId":Number,//模板ID
+       "img":{},//简历图片
       "resumeContent":{//简历内容
          "baseInfoList":{},//基本信息
          "SkillList":[],//技能特长

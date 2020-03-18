@@ -11,6 +11,7 @@ var usersRouter = require('./routes/users');
 var resumesRouter = require('./routes/resumes');
 var resumesImgRouter = require('./routes/resumeImgs');
 var resumeTemplatesRouter = require('./routes/resumeTemplates');
+var mallsRouter = require('./routes/malls');
 
 var app = express();
 
@@ -38,6 +39,7 @@ app.use('/users', usersRouter);
 app.use('/resumes', resumesRouter);
 app.use('/resumeTemplates', resumeTemplatesRouter);
 app.use('/resumeImgs', resumesImgRouter);
+app.use('/malls', mallsRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
