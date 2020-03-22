@@ -7,31 +7,59 @@ let path = require("path");
 
 // 通过模板商城提交
 router.post('/resumeTemplates', function(req, res, next) {
-    var resumeContent = req.body.content
-   //  resumeContent.creatTime = (new Date).toString()
-    resumeTemplates.create(resumeContent, function(err, doc) {
-
-        if (err) {
-            res.json({
-                status: "1",
-                msg: "注提交失败" + err
-            });
-        } else {
-            res.json({
-                status: "0",
-                msg: "提交成功",
-                result: ""
-            });
-        }
-    })
+    var param = {
+        userName:req.body.content.userName,
+        // TemplateId:req.param("TemplateId")
+      }
+      resumeTemplates.find(param, function (err0, doc0) {
+        //如果里面已经有简历了，就 往resumeTemplate数组里面加，没有的话就新建
+          if(doc0[0].resumeTemplate.length){
+              doc0[0].resumeTemplate.push(req.body.content.resumeTemplate)
+              console.log(doc0[0],"doc0[0]")
+              doc0[0].save(function(err1,doc1){
+                if (err1) {
+                    res.json({
+                        status: "1",
+                        msg: "注提交失败" + err1
+                    });
+                } else {
+                    res.json({
+                        status: "0",
+                        msg: "提交成功",
+                        result: ""
+                    });
+                }
+             })
+          }
+      })
+//     var resumeContent = req.body.content
+//    //  resumeContent.creatTime = (new Date).toString()
+//     resumeTemplates.create(resumeContent, function(err, doc) {
+//         if (err) {
+//             res.json({
+//                 status: "1",
+//                 msg: "注提交失败" + err
+//             });
+//         } else {
+//             res.json({
+//                 status: "0",
+//                 msg: "提交成功",
+//                 result: ""
+//             });
+//         }
+//     })
 });
 
 // 读取模板简历信息
 router.get('/getTemplatesResume', function (req, res, next) {
     var param = {
         userName:req.param("userName"),
+        // TemplateId:req.param("TemplateId")
       }
       resumeTemplates.findOne(param, function (err, doc) {
+        // doc.forEach(item => {
+        //       if(item.resumeTemplate)
+        //   });
         if (err) {
           res.json({
             status: "1",
