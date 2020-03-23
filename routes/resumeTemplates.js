@@ -8,71 +8,128 @@ let path = require("path");
 // 通过模板商城提交
 router.post('/resumeTemplates', function(req, res, next) {
     var param = {
-        userName:req.body.content.userName,
+        userName: req.body.content.userName,
         // TemplateId:req.param("TemplateId")
-      }
-      resumeTemplates.find(param, function (err0, doc0) {
-        //如果里面已经有简历了，就 往resumeTemplate数组里面加，没有的话就新建
-          if(doc0[0].resumeTemplate.length){
-              doc0[0].resumeTemplate.push(req.body.content.resumeTemplate)
-              console.log(doc0[0],"doc0[0]")
-              doc0[0].save(function(err1,doc1){
-                if (err1) {
+    }
+    let TemplateId = req.body.TemplateId
+    resumeTemplates.find(param, function(err0, doc0) {
+        // 先查集合，看是否存在
+        // 注意这里的判断：集合如果是空，那么doc0为空数组[]，我们不能这样判断doc0==[],
+        // 因为数组是对象，为引用类型，任何两个数组都不相等，[]==[]为false，我们可以用
+        // doc0==""做判断，它会进行隐式转换，即[].toString()==""，为true
+        if (doc0 == "") {
+            // 集合不存在，新建集合
+            resumeTemplates.create(req.body.content, function(err, doc) {
+                if (err) {
                     res.json({
                         status: "1",
-                        msg: "注提交失败" + err1
+                        msg: "提交失败" + err
                     });
                 } else {
                     res.json({
                         status: "0",
-                        msg: "提交成功",
-                        result: ""
+                        msg: "提交成功"
                     });
                 }
-             })
-          }
-      })
-//     var resumeContent = req.body.content
-//    //  resumeContent.creatTime = (new Date).toString()
-//     resumeTemplates.create(resumeContent, function(err, doc) {
-//         if (err) {
-//             res.json({
-//                 status: "1",
-//                 msg: "注提交失败" + err
-//             });
-//         } else {
-//             res.json({
-//                 status: "0",
-//                 msg: "提交成功",
-//                 result: ""
-//             });
-//         }
-//     })
+            })
+        } else { //如果存在集合了，查询该模板是否存在，看TemplateId是否匹配
+            let val = doc0[0].resumeTemplate
+            for (var i = 0; i < val.length; i++) {
+                // 如果存在，更新该模板简历
+                if (val[i].TemplateId == TemplateId) {
+                    doc0[0].resumeTemplate[i] = req.body.content.resumeTemplate[0]
+                    doc0[0].save(function(err1, doc1) {
+                        if (err1) {
+                            res.json({
+                                status: "1",
+                                msg: "提交失败" + err1
+                            })
+                        } else {
+                            res.json({
+                                status: "0",
+                                msg: "已有该模板简历，提交成功"
+                            })
+                        }
+                    })
+                    // 如果有该模板简历了，就不执行下面代码了
+                    // 注意:在map ,forEach循环中，return false只是退出该循环，而不会阻止后续代码执行
+                    // 如果想阻止后面代码执行，使用for循环
+                    return false
+                }
+              }
+                // 如果没有改模板简历，就向简历数组中新建该简历
+                doc0[0].resumeTemplate.push(req.body.content.resumeTemplate[0])
+                doc0[0].save(function(err2, doc2) {
+                    if (err2) {
+                        res.json({
+                            status: "1",
+                            msg: "提交失败" + err2
+                        })
+                    } else {
+                        res.json({
+                            status: "0",
+                            msg: "无该模板简历，提交成功"
+                        })
+                    }
+                })
+           
+
+        }
+
+    })
 });
 
 // 读取模板简历信息
-router.get('/getTemplatesResume', function (req, res, next) {
+router.get('/getTemplatesResume', function(req, res, next) {
     var param = {
-        userName:req.param("userName"),
+        userName: req.param("userName"),
         // TemplateId:req.param("TemplateId")
-      }
-      resumeTemplates.findOne(param, function (err, doc) {
-        // doc.forEach(item => {
-        //       if(item.resumeTemplate)
-        //   });
-        if (err) {
+    }
+    let TemplateId = req.param("TemplateId")
+    // console.log(param,TemplateId)
+    resumeTemplates.findOne(param, function(err, doc) {
+      for(var i=0;i<doc.resumeTemplate.length;i++){
+        if (doc.resumeTemplate[i].TemplateId == TemplateId) {
           res.json({
-            status: "1",
-            msg: "查询简历信息失败" + err
+              status: "0",
+              msg: "查询成功",
+              result: doc.resumeTemplate[i]
           });
-        } else {
+          return false
+      } 
+    }
           res.json({
-            status: "0",
-            msg: "查询成功",
-            result:doc
+              status: "0",
+              msg: "查询成功，无数据",
+              result: ""
           });
-        }
-      })
+      
+      
+             
+        // if (err) {
+        //     res.json({
+        //         status: "1",
+        //         msg: "查询简历信息失败" + err
+        //     });
+        // } else {
+        //     doc.resumeTemplate.forEach(item => {
+        //         if (item.TemplateId == TemplateId) {
+        //             res.json({
+        //                 status: "0",
+        //                 msg: "查询成功",
+        //                 result: item
+        //             });
+        //         } else {
+        //             res.json({
+        //                 status: "0",
+        //                 msg: "查询成功，无数据",
+        //                 result: ""
+        //             });
+        //         }
+
+        //     });
+        // }
+    })
 });
 // // 读取首页图片列表
 // router.post('/resumeImgList', function(req, res, next) {
