@@ -9,7 +9,7 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var resumesRouter = require('./routes/resumes');
-var resumesImgRouter = require('./routes/resumeImgs');
+var collectionRouter = require('./routes/collections');
 var resumeTemplatesRouter = require('./routes/resumeTemplates');
 var mallsRouter = require('./routes/malls');
 
@@ -38,7 +38,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/resumes', resumesRouter);
 app.use('/resumeTemplates', resumeTemplatesRouter);
-app.use('/resumeImgs', resumesImgRouter);
+app.use('/collections', collectionRouter);
 app.use('/malls', mallsRouter);
 
 // catch 404 and forward to error handler

@@ -103,34 +103,61 @@ router.get('/getTemplatesResume', function(req, res, next) {
               msg: "查询成功，无数据",
               result: ""
           });
-      
-      
-             
-        // if (err) {
-        //     res.json({
-        //         status: "1",
-        //         msg: "查询简历信息失败" + err
-        //     });
-        // } else {
-        //     doc.resumeTemplate.forEach(item => {
-        //         if (item.TemplateId == TemplateId) {
-        //             res.json({
-        //                 status: "0",
-        //                 msg: "查询成功",
-        //                 result: item
-        //             });
-        //         } else {
-        //             res.json({
-        //                 status: "0",
-        //                 msg: "查询成功，无数据",
-        //                 result: ""
-        //             });
-        //         }
-
-        //     });
-        // }
     })
 });
+
+// 读取保存的简历图片
+router.get('/getMyResume', function(req, res, next) {
+    var param = {
+        userName: req.param("userName"),
+    }
+    resumeTemplates.findOne(param, function(err, doc) {
+         //如果没有保存简历，返回空
+          if(doc==[]||doc==null||doc==""){
+              res.json({
+              status: "1",
+              msg: "抱歉，您没有提交的简历",
+              result: ""
+          });
+          return false
+          }
+        //如果有，找到每个简历的图片字段，组成一个数组   
+          let imgList=[];
+          let content = doc.resumeTemplate
+          for(var i=0;i<content.length;i++){
+              imgList.push(content[i].img)
+        }
+        res.json({
+            status: "0",
+            msg: "查询成功",
+            result: imgList
+        });
+    })
+});
+
+// 删除保存的简历
+router.post('/deletaResume', function(req, res, next) {
+    var param = {
+        userName: req.param("userName"),
+    }
+    let name = req.body.name
+    resumeTemplates.findOne(param, function(err, doc) {
+        doc.update({$pull:{resumeTemplate:{TemplateId:name}}},function(err1,doc1){
+            if(err1){
+                res.json({
+                    status: "01",
+                    msg: "删除失败"+err1
+                });
+            }else{
+                res.json({
+                    status: "0",
+                    msg: "删除成功"
+                });
+            }
+        })
+    })
+});
+
 // // 读取首页图片列表
 // router.post('/resumeImgList', function(req, res, next) {
 //   var paramas = req.body.flag;
