@@ -52,7 +52,6 @@ router.get('/getImgList', function(req, res, next) {
                             if(doc2.resumeList[t].mallId==doc1[i].mallId){
                             console.log("已经收藏",doc1[i].mallId)
                             doc1[i].collectText="已经收藏"
-                            
                         }else{
                             console.log("收藏",doc1[i].mallId)
                             doc1[i].collectText="收藏"
