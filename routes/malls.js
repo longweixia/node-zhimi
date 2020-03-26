@@ -42,64 +42,59 @@ router.get('/getImgList', function(req, res, next) {
         // 这个需要pageSize转换为数字，因为传过来成了字符串
         let allMall = malls.find().skip(skip).limit(Number(pageSize))
         allMall.exec({},function(err1,doc1){
-            // 需要查询下当前用户有没有收藏该模板，如果有的话要返回给用户
-            
-            Collections.findOne(Collect, function(err2, doc2) {
-                // console.log(doc2.resumeList,"doc2")
-                var list=[];
-                for(var t=0;t<doc2.resumeList.length;t++){
-                    for(var i=0;i<doc1.length;i++){
-                            if(doc2.resumeList[t].mallId==doc1[i].mallId){
-                            console.log("已经收藏",doc1[i].mallId)
-                            doc1[i].collectText="已经收藏"
-                        }else{
-                            console.log("收藏",doc1[i].mallId)
-                            doc1[i].collectText="收藏"
-                        }
-                        list=list.concat(doc1[i])
-                        // console.log(list,"list")
-                    }
-                }
-            //     doc2.resumeList.forEach((item,index)=>{
-            //          doc1.forEach((item1,index1)=>{
-            //             if(item.mallId==item1.mallId){
-            //                 console.log("已经收藏",item.mallId)
-            //                 item1.collectText="已经收藏"
-                            
-            //             }else{
-            //                 console.log("收藏",item.mallId)
-            //                 item1.collectText="收藏"
-            //             }
-            //             list.concat(1)
-            //             console.log(list,"list")
-
-            // })
-                    
-            // })
-            
-            if (err1) {
+            if(err1){
                 res.json({
                     status: "1",
-                    msg: "获取失败"
+                    msg: "查询失败"+err1,
+                    result: ""
                 });
-            } else {
-                res.json({
-                    status: "0",
-                    msg: "获取成功",
-                    result:{
-                        list:list,
-                        totol:totol
-                    }
-                });
+                return false
             }
-            })
-            
-            
-            // doc1.forEach((item,index)=>{
-
-
-            // })
-            
+            // 需要查询下当前用户有没有收藏该模板，如果有的话要返回给用户
+            Collections.findOne(Collect, function(err2, doc2) {
+                // 如果查询收藏失败，直接返回模板商城数据
+                if(err2){
+                    res.json({
+                        status: "0",
+                        msg: "查询模板成功，查询是否收藏失败",
+                        result: doc1
+                    });
+                    return false
+                }
+                //注意： 这里发现直接给doc1加上collectText属性，加不上。所以，深克隆一份，给新对象挂载属性
+                var doc1b = JSON.parse(JSON.stringify(doc1))
+                doc1b.forEach(item => {
+                    item.collectText="收藏"
+                });
+                // 如果用户没有收藏，则给每个模板加上collectText:"收藏"
+                if(doc2==[]||doc2==null||doc2==""){
+                    res.json({
+                    status: "1",
+                    msg: "抱歉，您没有收藏的简历",
+                    result: {list:doc1b,totol:totol}
+                });
+            }else{
+                
+                for(var t=0;t<doc2.resumeList.length;t++){
+                    for(var i=0;i<doc1b.length;i++){
+                            if(doc2.resumeList[t].mallId==doc1b[i].mallId){
+                            console.log("已经收藏",doc1b[i].mallId)
+                            //注意： doc1[i].collectText="已经收藏" ，这样添加属性是不生效的，只能给克隆对象添加
+                            doc1b[i].collectText="已收藏"
+                           
+                        }
+                    }
+                }
+                    res.json({
+                        status: "0",
+                        msg: "获取成功",
+                        result:{
+                            list:doc1b,
+                            totol:totol
+                        }
+                    });
+            }
+            })       
         })
     })
  
