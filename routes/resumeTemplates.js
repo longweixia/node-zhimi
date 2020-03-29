@@ -158,6 +158,43 @@ router.post('/deletaResume', function(req, res, next) {
     })
 });
 
+// 查询该模板是否保存了简历
+router.get('/findHasResume', function(req, res, next) {
+    var param = {
+        userName: req.param("userName"),
+    }
+    resumeTemplates.findOne(param, function(err, doc) {
+         //如果没有保存简历，返回空
+          if(doc==[]||doc==null||doc==""){
+              res.json({
+              status: "1",
+              msg: "抱歉，您没有提交的简历",
+              result: "1"
+          });
+          return false
+          }
+        
+          let imgList=[];
+          let content = doc.resumeTemplate
+          for(var i=0;i<content.length;i++){
+            //如果有，返回
+              if(content[i].TemplateId==req.param("TemplateId")){
+                res.json({
+                    status: "0",
+                    msg: "查询到您在该模板下有一份简历",
+                    result: "0"
+                });
+                return false
+              }
+        }
+        res.json({
+            status: "1",
+            msg: "抱歉，您没有提交的简历",
+            result: "1"
+        });
+    })
+});
+
 // // 读取首页图片列表
 // router.post('/resumeImgList', function(req, res, next) {
 //   var paramas = req.body.flag;
