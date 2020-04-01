@@ -5,16 +5,65 @@ var multer = require('multer');
 let fs = require("fs");
 let path = require("path");
 var Collections = require('./../models/collection')
-
-// 上传模板商城图片
-router.post('/uploadImg', function(req, res, next) {
-    malls.find(function(err, docs) {
+// //方式1
+// // 上传模板商城图片，存base64在数据库
+// router.post('/uploadImg', function(req, res, next) {
+//     malls.find(function(err, docs) {
+//         let params = {
+//             imgUrl: req.body.imgUrl,
+//             mallId: docs.length,
+//             indexs: docs.length
+//         }
+//         malls.create(params, function(err1, doc1) {
+//             if (err1) {
+//                 res.json({
+//                     status: "1",
+//                     msg: "上传失败" + err1
+//                 });
+//             } else {
+//                 res.json({
+//                     status: "0",
+//                     msg: "上传成功",
+//                 });
+//             }
+//         })
+//     })
+// });
+////方式1结束
+// 上传模板商城图片，方式2开始，存图片路径在数据库
+router.post('/uploadImg',multer({
+    //设置文件存储路径
+   dest: 'upload'   //upload文件如果不存在则会自己创建一个。
+  }).single('file'), function (req, res, next) {
+  if (req.file.length === 0) {  //判断一下上传的文件是否存在，也可以在前端代码中进行判断。
+    res.json({
+      status: "1",
+      msg: "上传失败" + err
+    });
+  } else {
+     let file = req.file;
+     let mallId = req.body.mallId
+     console.log(mallId,file.originalname,"-====")
+    //  let fileInfo = {};
+     
+     fs.renameSync('./upload/' + file.filename, './upload/' + file.originalname);//这里修改文件名字，比较随意。
+     // 获取文件信息
+    //  fileInfo.mimetype = file.mimetype;
+    //  fileInfo.originalname = file.originalname;
+    //  fileInfo.size = file.size;
+    //  fileInfo.path = file.path;
+    //  console.log(fileInfo,"fileInfo");
+        malls.find(function(err, docs) {
         let params = {
-            imgUrl: req.body.imgUrl,
-            mallId: docs.length,
-            indexs: docs.length
+            imgUrl: "F:/myproject/zhimi/node-zhimi/upload/"+file.originalname,
+            mallId:mallId,
+            indexs: mallId
         }
         malls.create(params, function(err1, doc1) {
+             // 设置响应类型及编码
+     res.set({
+        'content-type': 'application/json; charset=utf-8'
+     });
             if (err1) {
                 res.json({
                     status: "1",
@@ -28,8 +77,17 @@ router.post('/uploadImg', function(req, res, next) {
             }
         })
     })
-});
-
+  
+    
+  
+    // res.json({
+    //   status: "0",
+    //   msg: "上传成功"
+    // });
+  }
+  }
+  );
+// 方式2结束
 // 读取模板商城图片
 router.get('/getImgList', function(req, res, next) {
     let pageSize = req.param("pageSize")

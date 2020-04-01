@@ -121,9 +121,8 @@ router.post('/getResumeInfo', function (req, res, next) {
 //     })
 // });
 
-//上传接口，暂时用不上了
-router.post('/file', 
 // 上传方式1将图片转为base64
+router.post('/file', 
 multer({}).single('file'), function (req, res, next) {
   let files = req.file
   console.log(files)
@@ -139,38 +138,38 @@ multer({}).single('file'), function (req, res, next) {
 // 方式1结束
 // 上传方式2，改方式为将图片存到node项目的upload目录中，
 // 但实际使用发现不好根据多种条件来查询
-// multer({
-//   //设置文件存储路径
-//  dest: 'upload'   //upload文件如果不存在则会自己创建一个。
-// }).single('file'), function (req, res, next) {
-// if (req.file.length === 0) {  //判断一下文件是否存在，也可以在前端代码中进行判断。
-//   res.json({
-//     status: "1",
-//     msg: "上传失败" + err
-//   });
-// } else {
-//    let file = req.file;
-//    let fileInfo = {};
-//    console.log(file);
-//    fs.renameSync('./upload/' + file.filename, './upload/' + file.originalname);//这里修改文件名字，比较随意。
-//    // 获取文件信息
-//    fileInfo.mimetype = file.mimetype;
-//    fileInfo.originalname = file.originalname;
-//    fileInfo.size = file.size;
-//    fileInfo.path = file.path;
+router.post('/file', multer({
+  //设置文件存储路径
+ dest: 'upload'   //upload文件如果不存在则会自己创建一个。
+}).single('file'), function (req, res, next) {
+if (req.file.length === 0) {  //判断一下文件是否存在，也可以在前端代码中进行判断。
+  res.json({
+    status: "1",
+    msg: "上传失败" + err
+  });
+} else {
+   let file = req.file;
+   let fileInfo = {};
+   console.log(file);
+   fs.renameSync('./upload/' + file.filename, './upload/' + file.originalname);//这里修改文件名字，比较随意。
+   // 获取文件信息
+   fileInfo.mimetype = file.mimetype;
+   fileInfo.originalname = file.originalname;
+   fileInfo.size = file.size;
+   fileInfo.path = file.path;
 
-//    // 设置响应类型及编码
-//    res.set({
-//      'content-type': 'application/json; charset=utf-8'
-//   });
+   // 设置响应类型及编码
+   res.set({
+     'content-type': 'application/json; charset=utf-8'
+  });
 
-//   res.json({
-//     status: "0",
-//     msg: "上传成功"
-//   });
-// }
-// }
-// );
+  res.json({
+    status: "0",
+    msg: "上传成功"
+  });
+}
+}
+);
 // 方式2结束
 
 //下载接口
