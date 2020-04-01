@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var resumeTemplates = require('./../models/resumeTemplate')
+var clubs = require('./../models/club')
 var multer = require('multer');
 let fs = require("fs");
 let path = require("path");
@@ -56,23 +57,23 @@ router.post('/resumeTemplates', function(req, res, next) {
                     // 如果想阻止后面代码执行，使用for循环
                     return false
                 }
-              }
-                // 如果没有改模板简历，就向简历数组中新建该简历
-                doc0[0].resumeTemplate.push(req.body.content.resumeTemplate[0])
-                doc0[0].save(function(err2, doc2) {
-                    if (err2) {
-                        res.json({
-                            status: "1",
-                            msg: "提交失败" + err2
-                        })
-                    } else {
-                        res.json({
-                            status: "0",
-                            msg: "无该模板简历，提交成功"
-                        })
-                    }
-                })
-           
+            }
+            // 如果没有改模板简历，就向简历数组中新建该简历
+            doc0[0].resumeTemplate.push(req.body.content.resumeTemplate[0])
+            doc0[0].save(function(err2, doc2) {
+                if (err2) {
+                    res.json({
+                        status: "1",
+                        msg: "提交失败" + err2
+                    })
+                } else {
+                    res.json({
+                        status: "0",
+                        msg: "无该模板简历，提交成功"
+                    })
+                }
+            })
+
 
         }
 
@@ -88,21 +89,21 @@ router.get('/getTemplatesResume', function(req, res, next) {
     let TemplateId = req.param("TemplateId")
     // console.log(param,TemplateId)
     resumeTemplates.findOne(param, function(err, doc) {
-      for(var i=0;i<doc.resumeTemplate.length;i++){
-        if (doc.resumeTemplate[i].TemplateId == TemplateId) {
-          res.json({
-              status: "0",
-              msg: "查询成功",
-              result: doc.resumeTemplate[i]
-          });
-          return false
-      } 
-    }
-          res.json({
-              status: "0",
-              msg: "查询成功，无数据",
-              result: ""
-          });
+        for (var i = 0; i < doc.resumeTemplate.length; i++) {
+            if (doc.resumeTemplate[i].TemplateId == TemplateId) {
+                res.json({
+                    status: "0",
+                    msg: "查询成功",
+                    result: doc.resumeTemplate[i]
+                });
+                return false
+            }
+        }
+        res.json({
+            status: "0",
+            msg: "查询成功，无数据",
+            result: ""
+        });
     })
 });
 
@@ -112,26 +113,49 @@ router.get('/getMyResume', function(req, res, next) {
         userName: req.param("userName"),
     }
     resumeTemplates.findOne(param, function(err, doc) {
-         //如果没有保存简历，返回空
-          if(doc==[]||doc==null||doc==""){
-              res.json({
-              status: "1",
-              msg: "抱歉，您没有提交的简历",
-              result: ""
-          });
-          return false
-          }
-        //如果有，找到每个简历的图片字段，组成一个数组   
-          let imgList=[];
-          let content = doc.resumeTemplate
-          for(var i=0;i<content.length;i++){
-              imgList.push(content[i].img)
+        //如果没有保存简历，返回空
+        if (doc == [] || doc == null || doc == "") {
+            res.json({
+                status: "1",
+                msg: "抱歉，您没有提交的简历",
+                result: ""
+            });
+            return false
         }
-        res.json({
-            status: "0",
-            msg: "查询成功",
-            result: imgList
-        });
+        //如果有，找到每个简历的图片字段，组成一个数组   
+        let imgList = [];
+        let content = doc.resumeTemplate
+        clubs.findOne(param, function(err0, doc0) {
+            if (err0) {
+                res.json({
+                    status: "1",
+                    msg: "查询失败",
+                    result: ""
+                });
+                return false
+            }
+            for (var t = 0; t < content.length; t++) {
+                content[t].img.share = "分享至社区"
+            }
+            if (doc0 == [] || doc0 == null || doc0 == "") {} else {
+                for (var t = 0; t < content.length; t++) {
+                    for (var i = 0; i < doc0.shareList.length; i++) {
+                        if (content[t].TemplateId == doc0.shareList[i]) {
+                            content[t].img.share = "已分享"
+
+                        }
+                    }
+                }
+            }
+            for (var i = 0; i < content.length; i++) {
+                imgList.push(content[i].img)
+            }
+            res.json({
+                status: "0",
+                msg: "查询成功",
+                result: imgList
+            });
+        })
     })
 });
 
@@ -142,13 +166,13 @@ router.post('/deletaResume', function(req, res, next) {
     }
     let name = req.body.name
     resumeTemplates.findOne(param, function(err, doc) {
-        doc.update({$pull:{resumeTemplate:{TemplateId:name}}},function(err1,doc1){
-            if(err1){
+        doc.update({ $pull: { resumeTemplate: { TemplateId: name } } }, function(err1, doc1) {
+            if (err1) {
                 res.json({
                     status: "01",
-                    msg: "删除失败"+err1
+                    msg: "删除失败" + err1
                 });
-            }else{
+            } else {
                 res.json({
                     status: "0",
                     msg: "删除成功"
@@ -164,28 +188,28 @@ router.get('/findHasResume', function(req, res, next) {
         userName: req.param("userName"),
     }
     resumeTemplates.findOne(param, function(err, doc) {
-         //如果没有保存简历，返回空
-          if(doc==[]||doc==null||doc==""){
-              res.json({
-              status: "1",
-              msg: "抱歉，您没有提交的简历",
-              result: "1"
-          });
-          return false
-          }
-        
-          let imgList=[];
-          let content = doc.resumeTemplate
-          for(var i=0;i<content.length;i++){
+        //如果没有保存简历，返回空
+        if (doc == [] || doc == null || doc == "") {
+            res.json({
+                status: "1",
+                msg: "抱歉，您没有提交的简历",
+                result: "1"
+            });
+            return false
+        }
+
+        let imgList = [];
+        let content = doc.resumeTemplate
+        for (var i = 0; i < content.length; i++) {
             //如果有，返回
-              if(content[i].TemplateId==req.param("TemplateId")){
+            if (content[i].TemplateId == req.param("TemplateId")) {
                 res.json({
                     status: "0",
                     msg: "查询到您在该模板下有一份简历",
                     result: "0"
                 });
                 return false
-              }
+            }
         }
         res.json({
             status: "1",
