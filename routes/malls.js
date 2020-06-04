@@ -33,7 +33,7 @@ var Collections = require('./../models/collection')
 // 上传模板商城图片，方式2开始，存图片路径在数据库
 router.post('/uploadImg',multer({
     //设置文件存储路径
-   dest: 'upload'   //upload文件如果不存在则会自己创建一个。
+   dest: './public/images/mall/'   //upload文件如果不存在则会自己创建一个。
   }).single('file'), function (req, res, next) {
   if (req.file.length === 0) {  //判断一下上传的文件是否存在，也可以在前端代码中进行判断。
     res.json({
@@ -46,7 +46,7 @@ router.post('/uploadImg',multer({
      console.log(mallId,file.originalname,"-====")
     //  let fileInfo = {};
      
-     fs.renameSync('./upload/' + file.filename, './upload/' + file.originalname);//这里修改文件名字，比较随意。
+     fs.renameSync('./public/images/mall/' + file.filename, './public/images/mall/' + file.originalname);//这里修改文件名字，比较随意。
      // 获取文件信息
     //  fileInfo.mimetype = file.mimetype;
     //  fileInfo.originalname = file.originalname;
@@ -55,7 +55,7 @@ router.post('/uploadImg',multer({
     //  console.log(fileInfo,"fileInfo");
         malls.find(function(err, docs) {
         let params = {
-            imgUrl: "F:/myproject/zhimi/node-zhimi/upload/"+file.originalname,
+            imgUrl: "http://localhost:3000/images/mall/"+file.originalname,
             mallId:mallId,
             indexs: mallId
         }

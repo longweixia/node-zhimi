@@ -4,7 +4,7 @@ var clubs = require('./../models/club')
 var multer = require('multer');
 let fs = require("fs");
 let path = require("path");
-// var Collections = require('./../models/collection')
+var Collections = require('./../models/collection')
 
 // 分享到社区
 router.post('/share', function(req, res, next) {
