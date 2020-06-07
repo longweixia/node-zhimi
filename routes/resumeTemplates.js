@@ -139,12 +139,12 @@ router.get('/getMyResume', function(req, res, next) {
             }
             if (doc0 == [] || doc0 == null || doc0 == "") {} else {
                 for (var t = 0; t < content.length; t++) {
-                    for (var i = 0; i < doc0.shareList.length; i++) {
-                        if (content[t].TemplateId == doc0.shareList[i]) {
-                            content[t].img.share = "已分享"
+                    // for (var i = 0; i < doc0.shareList.length; i++) {
+                        if (content[t].TemplateId == doc0.shareList.Templated) {
+                            content[t].img.share = "取消分享"
 
                         }
-                    }
+                    // }
                 }
             }
             for (var i = 0; i < content.length; i++) {

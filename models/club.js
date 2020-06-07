@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var clubSchema = new mongoose.Schema({
     "userName": String,
-    "shareList":[]
+    "shareList":{}
 })
 
 module.exports = mongoose.model('Club', clubSchema);

@@ -30,7 +30,19 @@ var usersList = []; //存储聊天用户名字，头像
 io.on("connection", function(socket) {
   //接收-->，已加入聊天用户信息的数组
   socket.on("postUser", user => {
-    usersList.push(user);
+    console.log(user,usersList)
+    var t = usersList.length
+    // 如果用户已经跟另外一个用户在聊了，则返回
+    let flag = true;
+    for(var i=0;i<t;i++){
+      if(user.userName==usersList[i].userName){
+        flag = false
+      }
+    }
+    if(flag==true){
+        usersList.push(user);
+    }
+  
 
     // 设置socket的名字
     socket.nickname = user.userName;

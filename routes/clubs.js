@@ -1,157 +1,152 @@
 var express = require('express');
 var router = express.Router();
 var clubs = require('./../models/club')
+var resumeTemplates = require('./../models/resumeTemplate')
 var multer = require('multer');
 let fs = require("fs");
 let path = require("path");
 var Collections = require('./../models/collection')
 
-// 分享到社区
+
+// 分享/取消分享到社区
+// 需要注意的是一个人只能同时分享一份简历数据
 router.post('/share', function(req, res, next) {
-    clubs.find(function(err, docs) {
-        var params = {
-            userName: req.body.userName
-        }
-        let userName = req.body.userName
-        let Templated = req.body.Templated
-        let list = {
-            userName: userName,
-            shareList: [Templated]
-        }
-        clubs.find(params, function(err0, doc0) {
-            if (err0) {
-                res.json({
-                    status: "1",
-                    msg: "分享失败" + err0
-                });
-                return false
+    let userName = req.body.userName
+    let Templated = req.body.Templated
+    var list = {
+        userName: userName,
+        shareList: {
+            Templated: Templated,
+            baseInfoList: {
+             
             }
-            if (doc0 == "") {
-                clubs.create(list, function(err, doc) {
-                    if (err) {
+        }
+    }
+    var baseInfoList = {};
+    var params = {
+        userName: userName
+    }
+    // 分享的时候，把简历的baseinfo信息分享过去
+    resumeTemplates.find(params).exec({}, function(err4, doc4) {
+        doc4[0].resumeTemplate.forEach((item, index) => {
+            // 找到用户要分享的简历ID的基本信息
+            if (Templated == item.TemplateId) {
+                baseInfoList = item.resumeContent.baseInfoList
+                list.shareList.baseInfoList = baseInfoList
+                list.shareList.baseInfoList.SkillList=[]
+                list.shareList.baseInfoList.SkillList.push(item.resumeContent.SkillList)
+                // baseInfoList.skillList= item.resumeContent.SkillList
+                clubs.find(params, function(err1, doc1) {
+                    if (err1) {
                         res.json({
                             status: "1",
-                            msg: "分享失败" + err
+                            msg: "分享失败" + err1
                         });
+                        return false
+                    }
+                    // 再将baseinfo绑定到分享的集合中用户的id
+                    // 如果一开始是空的，就直接创建集合
+                    if (doc1 == "") {
+                        // list.shareList.baseInfoList = baseInfoList
+                        
+                        clubs.create(list, function(err2, doc2) {
+                            if (err2) {
+                                res.json({
+                                    status: "1",
+                                    msg: "分享失败" + err2
+                                });
+                            } else {
+                                res.json({
+                                    status: "0",
+                                    msg: "分享成功"
+                                });
+                            }
+                        })
                     } else {
-                        res.json({
-                            status: "0",
-                            msg: "分享成功"
-                        });
+                        // 如果不是空的
+                        let val = doc1[0].shareList
+                        //如果存在的话，就删除他
+                        if (val.Templated == Templated) {
+                            doc1[0].shareList = {}
+                            doc1[0].save(function(err4, doc4) {
+                                if (err4) {
+                                    res.json({
+                                        status: "2",
+                                        msg: "取消分享失败" + err4
+                                    });
+                                } else {
+                                    res.json({
+                                        status: "3",
+                                        msg: "取消分享成功"
+                                    });
+                                }
+                            })
+                            return false
+                        }
+
+                        // 如果不存在的话
+                        doc1[0].shareList = { Templated: Templated, baseInfoList: baseInfoList }
+                        doc1[0].save(function(err3, doc3) {
+                            if (err3) {
+                                res.json({
+                                    status: "1",
+                                    msg: "分享失败" + err3
+                                });
+                            } else {
+                                res.json({
+                                    status: "0",
+                                    msg: "分享成功"
+                                });
+                            }
+                        })
                     }
                 })
-            } else {
-                let val = doc0[0].shareList
-                //如果存在的话，不做操作
-                if (val.indexOf(Templated) !== -1) {
-                    res.json({
-                        status: "1",
-                        msg: "该简历已经分享过了"
-                    });
-                } else {
-                    doc0[0].shareList.push(Templated)
-                    doc0[0].save(function(err1, doc1) {
-                        if (err1) {
-                            res.json({
-                                status: "1",
-                                msg: "分享失败" + err1
-                            });
-                        } else {
-                            res.json({
-                                status: "0",
-                                msg: "分享成功"
-                            });
-                        }
-                    })
-                }
             }
-
-        })
+        });
     })
 });
 
-
-// [ { shareList: [ '3', '4' ],
-//     _id: 5e84a6c96df1761728dbb5a8,
-//     userName: 'long',
-//     __v: 1 },
-//   { shareList: [ '3', '4' ],
-//     _id: 5e84ac5d3070661970315ff9,
-//     userName: 'wei',
-//     __v: 1 } ]
-
-
-// 读取社区分享的图片
+// 读取某个用户社区分享的简历
 router.get('/getClubList', function(req, res, next) {
-    let pageSize = req.param("pageSize")
-    let currentPage = req.param("currentPage")
-    let Collect = { userName: req.param("userName") }
-    let skip = (currentPage - 1) * pageSize //从哪一条开始查询
-    let totol; //总条数
-    clubs.find().exec({}, function(err0, doc0) {
-        // console.log(doc0,"doc0000")
-        totol = doc0.length;
-        // 这个需要pageSize转换为数字，因为传过来成了字符串
-        let allMall = clubs.find().skip(skip).limit(Number(pageSize))
-        allMall.exec({}, function(err1, doc1) {
-            console.log(doc1,"doc11111")
-            if (err1) {
-                res.json({
-                    status: "1",
-                    msg: "查询失败" + err1,
-                    result: ""
-                });
-                return false
-            }
-            // 需要查询下当前用户有没有收藏该模板，如果有的话要返回给用户
-            Collections.findOne(Collect, function(err2, doc2) {
-                // 如果查询收藏失败，直接返回模板商城数据
-                if (err2) {
-                    res.json({
-                        status: "0",
-                        msg: "查询模板成功，查询是否收藏失败",
-                        result: doc1
-                    });
-                    return false
-                }
-                //注意： 这里发现直接给doc1加上collectText属性，加不上。所以，深克隆一份，给新对象挂载属性
-                var doc1b = JSON.parse(JSON.stringify(doc1))
-                doc1b.forEach(item => {
-                    item.collectText = "收藏"
-                });
-                // 如果用户没有收藏，则给每个模板加上collectText:"收藏"
-                if (doc2 == [] || doc2 == null || doc2 == "") {
-                    res.json({
-                        status: "1",
-                        msg: "抱歉，您没有收藏的简历",
-                        result: { list: doc1b, totol: totol }
-                    });
-                } else {
-
-                    for (var t = 0; t < doc2.resumeList.length; t++) {
-                        for (var i = 0; i < doc1b.length; i++) {
-                            if (doc2.resumeList[t].mallId == doc1b[i].mallId) {
-                                console.log("已经收藏", doc1b[i].mallId)
-                                //注意： doc1[i].collectText="已经收藏" ，这样添加属性是不生效的，只能给克隆对象添加
-                                doc1b[i].collectText = "已收藏"
-
-                            }
-                        }
-                    }
-                    res.json({
-                        status: "0",
-                        msg: "获取成功",
-                        result: {
-                            list: doc1b,
-                            totol: totol
-                        }
-                    });
-                }
-            })
-        })
+    let params = { userName: req.param("userName") }
+    clubs.find(params).exec({}, function(err0, doc0) {
+        if (err0) {
+            res.json({
+                status: "1",
+                msg: "查询失败" + err0,
+                result: ""
+            });
+        } else {
+            res.json({
+                status: "0",
+                msg: "查询成功",
+                result: doc0[0].shareList.baseInfoList
+            });
+        }
     })
 
 });
-
+// 读取所有用户社区分享的简历
+router.get('/getAllClubList', function(req, res, next) {
+    clubs.find().exec({}, function(err0, doc0) {
+        if (err0) {
+            res.json({
+                status: "1",
+                msg: "查询失败" + err0,
+                result: ""
+            });
+        } else {
+            let datas = [];
+            doc0.forEach((item, index) => {
+                datas.push(item.shareList.baseInfoList)
+            })
+            res.json({
+                status: "0",
+                msg: "查询成功",
+                result: datas
+            });
+        }
+    })
+});
 
 module.exports = router;
