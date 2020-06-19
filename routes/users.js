@@ -68,7 +68,9 @@ router.post('/login', function (req, res, next) {
             res.json({
               status: "0",
               msg: "登录成功",
-              result: doc1.token
+              result: doc1.token,
+              userImg:doc1.userImg,
+              userId:doc1._id
             })
           }
         })
@@ -157,6 +159,7 @@ router.post('/register', function (req, res, next) {
   var params = {
     userId:Math.floor(Math.random()*100),
     userName:req.body.userName,
+    userImg:req.body.userImg,
     userPwd:req.body.userPwd,
     token:token,
     creatTime:(new Date).toString()
@@ -181,7 +184,9 @@ router.post('/register', function (req, res, next) {
             res.json({
               status: "0",
               msg: "注册成功",
-              result:doc1.token
+              result:doc1.token,
+              userImg:doc1.userImg,
+              userId:doc1._id
             });
           }
         })
