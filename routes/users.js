@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('./../models/user')
+var chart = require('./../models/chart')
 // 连接mongodb数据库
 var mongoose = require('mongoose');
 
@@ -21,6 +22,20 @@ mongoose.connection.on("disconnected", function () {
   console.log("mongodb连接disconnected")
 })
 
+// 查询某个用户信息
+router.get('/findUser',function(req,res,next){
+  var param = {
+    userName: req.param("userName")
+  }
+  User.findOne(param,function(err,doc){
+    if(err){}else{
+      res.json({
+        status: "0",
+        result:doc.userIcon
+      });
+    }
+  })
+})
 // 登录接口
 router.post('/login', function (req, res, next) {
   //  查找某一个用户，根据用户密码   doc 是用户文档  
@@ -69,7 +84,7 @@ router.post('/login', function (req, res, next) {
               status: "0",
               msg: "登录成功",
               result: doc1.token,
-              userImg:doc1.userImg,
+              userImg:doc1.userIcon,
               userId:doc1._id
             })
           }
@@ -146,6 +161,7 @@ router.post('/loginOut', function (req, res, next) {
 });
 // 注册接口
 router.post('/register', function (req, res, next) {
+  var userIcon = req.body.userIcon
   var param = {
     userName:req.body.userName,
     userPwd:req.body.userPwd,
@@ -157,9 +173,9 @@ router.post('/register', function (req, res, next) {
     expiresIn: 60 * 60 * 1 // 1小时过期
   });
   var params = {
-    userId:Math.floor(Math.random()*100),
+    Id:Math.floor(Math.random()*100),
     userName:req.body.userName,
-    userImg:req.body.userImg,
+    userIcon:userIcon,
     userPwd:req.body.userPwd,
     token:token,
     creatTime:(new Date).toString()
@@ -172,6 +188,7 @@ router.post('/register', function (req, res, next) {
         msg: "注册失败" + err
       });
     } else {
+      
        // 不存在才创建用户
       if(!doc){
         User.create(params, function (err1, doc1) {
@@ -181,13 +198,37 @@ router.post('/register', function (req, res, next) {
               msg: "注册失败" + err1
             });
           } else {
-            res.json({
-              status: "0",
-              msg: "注册成功",
-              result:doc1.token,
-              userImg:doc1.userImg,
-              userId:doc1._id
-            });
+            chart.findOne(function(err2,doc2){
+              if(err2){
+                res.json({
+                  status: "1",
+                  msg: "注册失败" + err2
+                });
+                return false
+              }
+              let paramChat = {
+                userName:req.body.userName,
+                userId:doc1._id,
+                userImg:userIcon,
+                onechartList:[]
+              }
+              chart.create(paramChat,function(err3,doc3){
+                if(err3){
+                  res.json({
+                    status: "1",
+                    msg: "注册失败" + err3
+                  });
+                  return false
+                }
+                res.json({
+                  status: "0",
+                  msg: "注册成功",
+                  result:doc1.token,
+                  userImg:userIcon,
+                  userId:doc1._id
+                });
+              })
+            })
           }
         })
       }else{ // 存在就报错，用户存在

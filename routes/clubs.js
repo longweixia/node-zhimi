@@ -13,8 +13,12 @@ var Collections = require('./../models/collection')
 router.post('/share', function(req, res, next) {
     let userName = req.body.userName
     let Templated = req.body.Templated
+    let userImg = req.body.userImg
+    let userId = req.body.userId
     var list = {
         userName: userName,
+        userId:userId,
+        userImg:userImg,
         shareList: {
             Templated: Templated,
             baseInfoList: {
@@ -138,6 +142,10 @@ router.get('/getAllClubList', function(req, res, next) {
         } else {
             let datas = [];
             doc0.forEach((item, index) => {
+                item.shareList.baseInfoList.userName = item.userImg
+                item.shareList.baseInfoList.userImg = item.userImg
+                item.shareList.baseInfoList.userId = item.userId
+                item.shareList.baseInfoList.TemplateId = item.TemplateId
                 datas.push(item.shareList.baseInfoList)
             })
             res.json({

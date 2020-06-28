@@ -5,8 +5,44 @@ let fs = require("fs");
 let portrait = fs.readdirSync('./public/static/portrait')
 let emoji = fs.readdirSync('./public/static/emoticon/emoji')
 let emot = fs.readdirSync('./public/static/emoticon/emot')
+// 读取私聊列表
+router.get('/getoneCharts', function(req, res, next) {
+    var param ={
+        userId:req.param("userId")
+    }
+    Chart.findOne(param,function(err0,doc0){
+        if(err0){
+            res.json({
+                status: "1",
+                msg: "查询失败" + err0
+            });
+        }
+        else{
+            if(!doc0){
+                res.json({
+                    status: "0",
+                    msg: "无数据" 
+                });
+                return false
+            }
+            res.json({
+                status: "0",
+                msg: "成功" ,
+                result:doc0.onechartList
+            });
+        }
+    })
+    res.send({
+        status: "0",
+        result: {
+            portrait,
+            emoji,
+            emot
+        }
+    })
+});
 // 查询图片，资源，头像
-router.get('/getChatEmo', function(req, res, next) {
+router.get('/getChatImgList', function(req, res, next) {
     res.send({
         status: "0",
         result: {
