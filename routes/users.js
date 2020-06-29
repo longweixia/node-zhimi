@@ -173,7 +173,7 @@ router.post('/register', function (req, res, next) {
     expiresIn: 60 * 60 * 1 // 1小时过期
   });
   var params = {
-    Id:Math.floor(Math.random()*100),
+    ID:Math.floor(Math.random()*100),
     userName:req.body.userName,
     userIcon:userIcon,
     userPwd:req.body.userPwd,
@@ -210,7 +210,7 @@ router.post('/register', function (req, res, next) {
                 userName:req.body.userName,
                 userId:doc1._id,
                 userImg:userIcon,
-                onechartList:[]
+                oneChartList:[]
               }
               chart.create(paramChat,function(err3,doc3){
                 if(err3){

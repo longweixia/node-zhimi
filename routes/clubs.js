@@ -142,10 +142,10 @@ router.get('/getAllClubList', function(req, res, next) {
         } else {
             let datas = [];
             doc0.forEach((item, index) => {
-                item.shareList.baseInfoList.userName = item.userImg
+                item.shareList.baseInfoList.userName = item.userName
                 item.shareList.baseInfoList.userImg = item.userImg
                 item.shareList.baseInfoList.userId = item.userId
-                item.shareList.baseInfoList.TemplateId = item.TemplateId
+                item.shareList.baseInfoList.Templated = item.shareList.Templated
                 datas.push(item.shareList.baseInfoList)
             })
             res.json({
