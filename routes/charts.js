@@ -70,8 +70,6 @@ router.post('/postOneCharts', function(req, res, next) {
         } 
             // 集合不存在，创建
             if (flag=="findchat") {
-               
-                  
                         res.json({
                             status: "0",
                             msg: "联系人存在了",

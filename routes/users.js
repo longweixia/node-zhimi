@@ -188,7 +188,6 @@ router.post('/register', function (req, res, next) {
         msg: "注册失败" + err
       });
     } else {
-      
        // 不存在才创建用户
       if(!doc){
         User.create(params, function (err1, doc1) {

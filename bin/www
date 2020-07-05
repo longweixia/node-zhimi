@@ -6,11 +6,22 @@ var http = require("http");
 var port = normalizePort(process.env.PORT || "3000");
 app.set("port", port);
 
+var Charts = require("./../models/chart")
 var server = http.createServer(app);
 
 var socket = require("socket.io");
 var io = socket(server);
 
+function findChat(userInfo){
+    let userId = userInfo.userId
+    Charts.findOne({userId:userId},function(err0,doc0){
+        doc0.socketid = userInfo.socketid
+        doc0.save(function(err1,doc1){
+            userList.push(userInfo);
+            io.emit("user",userList)
+        })
+    })
+}
 // 连接socket
 //监听客户端连接
 let userList = [];//私聊用户列表
@@ -18,13 +29,23 @@ let chatGroupList = {};
 io.on('connection', (socket) => {
 	// 前端调用发送消息接口，后端接收到并广播
 	socket.on('login', (userInfo) => {
+        findChat(userInfo)
+        function unique(arr) {
+            const res = new Map();
+             return arr.filter(arr => !res.has(arr.userId) && res.set(arr.userId, 1));
+        }
+        userList = unique(userList)
         userList.push(userInfo);
         io.emit('userList', userList);
         // socket.emit(给该socket的客户端发送消息) + socket.broadcast.emit(发给所以客户端，不包括自己)  = io.emit(给所有客户端广播消息)
 	})
 
     socket.on('sendMsg', (data) => {
-        socket.to(data.id).emit('receiveMsg', data)
+        Charts.findOne({userId:data.id}).then(res=>{
+             socket.to(res.socketid).emit('receiveMsg', data) 
+        })
+
+      
 	})
 
     socket.on('sendMsgGroup', (data) => {
